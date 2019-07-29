@@ -101,5 +101,5 @@ ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalt
     val$X <- XX
   }
   val
-  print('test change1')
+  print('test change2')
 }
