@@ -28,6 +28,7 @@ ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalt
   ## Set up XX, yy, lambda
   tOrder <- order(y[,1])
   yy <- as.numeric(y[tOrder,1])
+  if(is.null(weights)){weights=replicate(length(yy),1)}
   weights <- as.numeric(weights[tOrder])
   Delta <- y[tOrder,2]
   n <- length(yy)
