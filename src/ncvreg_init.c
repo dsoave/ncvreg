@@ -94,7 +94,7 @@ double lasso(double z, double l1, double l2, double v) {
 
 static const R_CallMethodDef CallEntries[] = {
   {"cdfit_binomial", (DL_FUNC) &cdfit_binomial, 12},
-  {"cdfit_cox_dh",   (DL_FUNC) &cdfit_cox_dh,   12},
+  {"cdfit_cox_dh",   (DL_FUNC) &cdfit_cox_dh,   13},
   {"cdfit_gaussian", (DL_FUNC) &cdfit_gaussian, 11},
   {"cdfit_poisson",  (DL_FUNC) &cdfit_poisson,  12},
   {"maxprod",        (DL_FUNC) &maxprod,         4},
