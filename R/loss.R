@@ -21,15 +21,16 @@ loss.ncvreg <- function(y, yhat, family) {
   }
   val
 }
-loss.ncvsurv <- function(y, eta, total=TRUE) {
+loss.ncvsurv <- function(y, eta, weights, total=TRUE) {
   ind <- order(y[,1])
   d <- as.numeric(y[ind,2])
+  weights<-weights[ind]
   if (is.matrix(eta)) {
     eta <- eta[ind, , drop=FALSE]
-    r <- apply(eta, 2, function(x) rev(cumsum(rev(exp(x)))))
+    r <- apply(eta, 2, function(x) rev(cumsum(rev(weights*exp(x)))))
   } else {
     eta <- eta[ind]
-    r <- rev(cumsum(rev(exp(eta))))
+    r <- rev(cumsum(rev(weights*exp(eta))))
   }
   if (total) {
     return(-2*(crossprod(d, eta) - crossprod(d, log(r))))

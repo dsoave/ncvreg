@@ -1,6 +1,6 @@
 ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalty, SCAD=3.7, 3),
                     alpha=1, lambda.min=ifelse(n>p,.001,.05), nlambda=100, lambda, eps=1e-4, max.iter=10000,
-                    convex=TRUE, dfmax=p, penalty.factor=rep(1, ncol(X)), warn=TRUE, returnX, ...) {
+                    convex=TRUE, dfmax=p, penalty.factor=rep(1, ncol(X)), warn=TRUE, returnX, weights=NULL,...) {
 
   # Coersion
   penalty <- match.arg(penalty)
@@ -28,6 +28,7 @@ ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalt
   ## Set up XX, yy, lambda
   tOrder <- order(y[,1])
   yy <- as.numeric(y[tOrder,1])
+  weights <- as.numeric(weights[tOrder])
   Delta <- y[tOrder,2]
   n <- length(yy)
   XX <- std(X[tOrder,,drop=FALSE])
@@ -45,7 +46,7 @@ ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalt
 
   ## Fit
   res <- .Call("cdfit_cox_dh", XX, Delta, penalty, lambda, eps, as.integer(max.iter), as.double(gamma), penalty.factor,
-               alpha, as.integer(dfmax), as.integer(user.lambda | any(penalty.factor==0)), as.integer(warn))
+               alpha, as.integer(dfmax), as.integer(user.lambda | any(penalty.factor==0)), as.integer(warn), weights)
   b <- matrix(res[[1]], p, nlambda)
   loss <- -1*res[[2]]
   iter <- res[[3]]
@@ -101,5 +102,4 @@ ncvsurv <- function(X, y, penalty=c("MCP", "SCAD", "lasso"), gamma=switch(penalt
     val$X <- XX
   }
   val
-  print('test change2')
 }

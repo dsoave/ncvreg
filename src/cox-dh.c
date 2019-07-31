@@ -30,8 +30,8 @@ SEXP cleanupCox(double *a, int *e, double *eta, double *haz, double *rsk, SEXP b
 }
 
 // Coordinate descent for Cox models
-SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP max_iter_, SEXP gamma_, SEXP multiplier, SEXP alpha_, SEXP dfmax_, SEXP user_, SEXP warn_) {
-
+SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP max_iter_, SEXP gamma_, SEXP multiplier, SEXP alpha_, SEXP dfmax_, SEXP user_, SEXP warn_, SEXP weights_) {
+  
   // Lengths/dimensions
   int n = length(d_);
   int p = length(X_)/n;
@@ -40,6 +40,7 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
   // Pointers
   double *X = REAL(X_);
   double *d = REAL(d_);
+  double *weights = REAL(weights_);
   const char *penalty = CHAR(STRING_ELT(penalty_, 0));
   double *lam = REAL(lambda);
   double eps = REAL(eps_)[0];
@@ -115,7 +116,7 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
         double maxChange = 0;
 
         // Calculate haz, risk
-        for (int i=0; i<n; i++) haz[i] = exp(eta[i]);
+        for (int i=0; i<n; i++) haz[i] = weights[i]*exp(eta[i]);
         rsk[n-1] = haz[n-1];
         for (int i=n-2; i>=0; i--) {
           rsk[i] = rsk[i+1] + haz[i];

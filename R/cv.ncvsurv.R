@@ -1,10 +1,11 @@
-cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 'bootstrap'), returnY=FALSE, trace=FALSE) {
+cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 'bootstrap'), returnY=FALSE, trace=FALSE, weights=NULL) {
   se <- match.arg(se)
 
   # Complete data fit
   fit.args <- list(...)
   fit.args$X <- X
   fit.args$y <- y
+  fit.args$weights <- weights
   fit.args$returnX <- TRUE
   fit <- do.call("ncvsurv", fit.args)
 
@@ -45,7 +46,7 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
     if (!("cluster" %in% class(cluster))) stop("cluster is not of class 'cluster'; see ?makeCluster")
     parallel::clusterExport(cluster, c("fold","fit","X", "y", "cv.args"), envir=environment())
     parallel::clusterCall(cluster, function() require(ncvreg))
-    fold.results <- parallel::parLapply(cl=cluster, X=1:nfolds, fun=cvf.surv, XX=X, y=y, fold=fold, cv.args=cv.args)
+    fold.results <- parallel::parLapply(cl=cluster, X=1:nfolds, fun=cvf.surv, XX=X, y=y, fold=fold, cv.args=cv.args, weights=weights)
   }
 
   for (i in 1:nfolds) {
@@ -53,7 +54,7 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
       res <- fold.results[[i]]
     } else {
       if (trace) cat("Starting CV fold #",i,sep="","\n")
-      res <- cvf.surv(i, X, y, fold, cv.args)
+      res <- cvf.surv(i, X, y, fold, cv.args, weights)
     }
     Y[fold==i, 1:res$nl] <- res$yhat
   }
@@ -65,22 +66,29 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
 
   # Return
   if (se == "quick") {
-    L <- loss.ncvsurv(y, Y, total=FALSE)
+    L <- loss.ncvsurv(y, Y, weights=weights, total=FALSE)
     cve <- apply(L, 2, sum)/sum(fit$fail)
     cvse <- apply(L, 2, sd)*sqrt(nrow(L))/sum(fit$fail)
   } else {
-    cve <- as.numeric(loss.ncvsurv(y, Y))/sum(fit$fail)
-    cvse <- se.ncvsurv(y, Y)/sum(fit$fail)
+    cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))/sum(fit$fail)
+    cvse <- se.ncvsurv(y, Y, weights=weights)/sum(fit$fail)
   }
   min <- which.min(cve)
-
-  val <- list(cve=cve, cvse=cvse, fold=fold, lambda=lambda, fit=fit, min=min, lambda.min=lambda[min], null.dev=cve[1])
+  
+  # Cross-validated BIC
+  n.s <- predict(fit, lambda, type="nvars")
+  factor1<-log(sum(fit$fail))
+  cv.BIC<-(2*cve+factor1*n.s)
+  min.BIC<-which.min(cv.BIC)
+  
+  val <- list(cve=cve, cvse=cvse, fold=fold, lambda=lambda, fit=fit, min=min, lambda.min=lambda[min], null.dev=cve[1], lambda.minBIC=lambda[min.BIC],cv.BIC=cv.BIC)
   if (returnY) val$Y <- Y
   structure(val, class=c("cv.ncvsurv", "cv.ncvreg"))
 }
-cvf.surv <- function(i, XX, y, fold, cv.args) {
+cvf.surv <- function(i, XX, y, fold, cv.args, weights) {
   cv.args$X <- XX[fold!=i, , drop=FALSE]
   cv.args$y <- y[fold!=i,]
+  cv.args$weights <- weights[fold!=i]
   fit.i <- do.call("ncvsurv", cv.args)
 
   X2 <- XX[fold==i, , drop=FALSE]
