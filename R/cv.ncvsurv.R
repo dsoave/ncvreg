@@ -67,11 +67,15 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
   # Return
   if (se == "quick") {
     L <- loss.ncvsurv(y, Y, weights=weights, total=FALSE)
-    cve <- apply(L, 2, sum)/sum(fit$fail)
-    cvse <- apply(L, 2, sd)*sqrt(nrow(L))/sum(fit$fail)
+    #cve <- apply(L, 2, sum)/sum(fit$fail)
+    #cvse <- apply(L, 2, sd)*sqrt(nrow(L))/sum(fit$fail)
+    cve <- apply(L, 2, sum)
+    cvse <- apply(L, 2, sd)*sqrt(nrow(L))
   } else {
-    cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))/sum(fit$fail)
-    cvse <- se.ncvsurv(y, Y, weights=weights)/sum(fit$fail)
+    #cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))/sum(fit$fail)
+    #cvse <- se.ncvsurv(y, Y, weights=weights)/sum(fit$fail)
+    cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))
+    cvse <- se.ncvsurv(y, Y, weights=weights)
   }
   min <- which.min(cve)
   
