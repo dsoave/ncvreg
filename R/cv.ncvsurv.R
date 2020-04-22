@@ -85,6 +85,7 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
   if (returnY) val$Y <- Y
   structure(val, class=c("cv.ncvsurv", "cv.ncvreg"))
 }
+
 cvf.surv <- function(i, XX, y, fold, cv.args, weights) {
   cv.args$X <- XX[fold!=i, , drop=FALSE]
   cv.args$y <- y[fold!=i,]
