@@ -67,18 +67,22 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
   # Return
   if (se == "quick") {
     L <- loss.ncvsurv(y, Y, weights=weights, total=FALSE)
-    cve <- apply(L, 2, sum)/sum(fit$fail)
-    cvse <- apply(L, 2, sd)*sqrt(nrow(L))/sum(fit$fail)
+    #cve <- apply(L, 2, sum)/sum(fit$fail)
+    #cvse <- apply(L, 2, sd)*sqrt(nrow(L))/sum(fit$fail)
+    cve <- apply(L, 2, sum)
+    cvse <- apply(L, 2, sd)*sqrt(nrow(L))
   } else {
-    cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))/sum(fit$fail)
-    cvse <- se.ncvsurv(y, Y, weights=weights)/sum(fit$fail)
+    #cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))/sum(fit$fail)
+    #cvse <- se.ncvsurv(y, Y, weights=weights)/sum(fit$fail)
+    cve <- as.numeric(loss.ncvsurv(y, Y, weights=weights))
+    cvse <- se.ncvsurv(y, Y, weights=weights)
   }
   min <- which.min(cve)
   
   # Cross-validated BIC
   n.s <- predict(fit, lambda, type="nvars")
   factor1<-log(sum(fit$fail))
-  cv.BIC<-(2*cve*sum(fit$fail)+factor1*n.s)
+  cv.BIC<-(2*cve+factor1*n.s)
   min.BIC<-which.min(cv.BIC)
   
   val <- list(cve=cve, cvse=cvse, fold=fold, lambda=lambda, fit=fit, min=min, lambda.min=lambda[min], null.dev=cve[1], lambda.minBIC=lambda[min.BIC],cv.BIC=cv.BIC)
