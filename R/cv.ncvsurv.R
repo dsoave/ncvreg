@@ -77,8 +77,7 @@ cv.ncvsurv <- function(X, y, ..., cluster, nfolds=10, seed, fold, se=c('quick', 
   
   # Cross-validated BIC
   n.s <- predict(fit, lambda, type="nvars")
-  factor1<-log(sum(fit$fail))
-  cv.BIC<-(2*cve*sum(fit$fail)+factor1*n.s)
+  cv.BIC<-(2*cve*sum(fit$fail)+log(sum(fit$fail))*n.s)
   min.BIC<-which.min(cv.BIC)
   
   val <- list(cve=cve, cvse=cvse, fold=fold, lambda=lambda, fit=fit, min=min, lambda.min=lambda[min], null.dev=cve[1], lambda.minBIC=lambda[min.BIC],cv.BIC=cv.BIC)
