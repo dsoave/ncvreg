@@ -124,7 +124,7 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
           rsk[i] = rsk[i+1] + haz[i];
         }
         for (int i=0; i<n; i++) {
-          REAL(Loss)[l] += d[i]*eta[i] - d[i]*log(rsk[i]);
+          REAL(Loss)[l] += weights[i]*d[i]*eta[i] - d[i]*log(rsk[i]);
         } 
 
         // Approximate L
