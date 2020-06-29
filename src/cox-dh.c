@@ -71,6 +71,8 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
   double *rsk = Calloc(n, double);
   double *r = Calloc(n, double);
   double *h = Calloc(n, double);
+  double *h1 = Calloc(n, double);
+  double *h2 = Calloc(n, double);
   int *e = Calloc(p, int);
   for (int j=0; j<p; j++) e[j] = 0;
   double *eta = Calloc(n, double);
@@ -126,12 +128,14 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
         } 
 
         // Approximate L
-        h[0] = weights[0]*d[0]/rsk[0];
+        h1[0] = weights[0]*d[0]/rsk[0];
+        h2[0] = weights[0]*d[0]/pow(rsk[0],2);
         for (int i=1; i<n; i++) {
-          h[i] = h[i-1] + weights[i]*d[i]/rsk[i];
+          h1[i] = h1[i-1] + weights[i]*d[i]/rsk[i];
+          h2[i] = h2[i-1] + weights[i]*d[i]/pow(rsk[i],2);
         }
         for (int i=0; i<n; i++) {
-          h[i] = h[i]*haz[i];
+          h[i] = h1[i]*haz[i]-h2[i]*pow(haz[i],2);
           s = weights[i]*d[i] - h[i];
           if (h[i]==0) r[i]=0;
           else r[i] = s/h[i];
