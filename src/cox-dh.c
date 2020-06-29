@@ -136,7 +136,7 @@ SEXP cdfit_cox_dh(SEXP X_, SEXP d_, SEXP penalty_, SEXP lambda, SEXP eps_, SEXP 
         }
         for (int i=0; i<n; i++) {
           h[i] = h1[i]*haz[i]-h2[i]*pow(haz[i],2);
-          s = weights[i]*d[i] - h[i];
+          s = weights[i]*d[i] - h1[i]*haz[i];
           if (h[i]==0) r[i]=0;
           else r[i] = s/h[i];
         }
